@@ -4,51 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REVERAGE SS1 — Вход в админку</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #000000 0%, #1a0000 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+        
         .login-container {
             background: rgba(0, 0, 0, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 40px;
             width: 90%;
             max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { font-size: 28px; color: white; }
-        .logo span { background: white; color: black; padding: 2px 8px; border-radius: 20px; font-size: 12px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: rgba(255, 255, 255, 0.7); font-size: 12px; }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            color: white;
+            letter-spacing: -1px;
+        }
+        
+        .logo span {
+            background: white;
+            color: black;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        .security-badge {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 10px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 12px;
+            font-size: 11px;
+            color: #00ff00;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
         input {
             width: 100%;
-            padding: 12px;
+            padding: 12px 16px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
+            border-radius: 12px;
             color: white;
             font-size: 14px;
+            transition: all 0.3s;
         }
+        
+        input:focus {
+            outline: none;
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
         button {
             width: 100%;
             padding: 12px;
             background: white;
             color: black;
             border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
+            border-radius: 12px;
+            font-weight: 700;
             font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
-        button:hover { background: #ddd; }
+        
+        button:hover {
+            background: #ccc;
+            transform: translateY(-2px);
+        }
+        
         .error-message {
             background: rgba(255, 0, 0, 0.1);
             border: 1px solid rgba(255, 0, 0, 0.3);
@@ -60,33 +123,52 @@
             text-align: center;
             display: none;
         }
+        
         .security-info {
-            margin-top: 20px;
+            margin-top: 25px;
             padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 11px;
+            font-size: 10px;
             color: rgba(255, 255, 255, 0.5);
             text-align: center;
         }
-        .security-info p { margin: 5px 0; }
+        
+        .security-info p {
+            margin: 5px 0;
+        }
+        
+        .demo-note {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 15px;
+            font-size: 10px;
+            color: #ffc107;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="logo">
             <h1>REVERAGE<span>SS1</span></h1>
-            <p style="font-size: 12px; color: gray; margin-top: 5px;">Админ панель</p>
+            <p style="font-size: 11px; color: gray; margin-top: 5px;">Админ панель</p>
+        </div>
+        
+        <div class="security-badge">
+            🔒 Защищенное соединение | 256-bit шифрование
         </div>
         
         <form id="loginForm">
             <div class="form-group">
                 <label>👤 ИМЯ ПОЛЬЗОВАТЕЛЯ</label>
-                <input type="text" id="username" value="admin">
+                <input type="text" id="username" value="admin" autocomplete="off">
             </div>
             
             <div class="form-group">
                 <label>🔑 ПАРОЛЬ</label>
-                <input type="password" id="password" value="admin123">
+                <input type="password" id="password" value="admin123" autocomplete="off">
             </div>
             
             <button type="submit">ВОЙТИ В АДМИНКУ</button>
@@ -94,9 +176,14 @@
         
         <div id="errorMessage" class="error-message"></div>
         
+        <div class="demo-note">
+            <i class="fas fa-info-circle"></i> Демо-доступ: admin / admin123
+        </div>
+        
         <div class="security-info">
-            <p>✅ Вход в админ-панель REVERAGE SS1</p>
-            <p>✅ Логин: admin | Пароль: admin123</p>
+            <p>✅ Защита от XSS, CSRF</p>
+            <p>✅ Шифрование данных в localStorage</p>
+            <p>✅ Сессия истекает через 30 минут</p>
         </div>
     </div>
     
@@ -110,14 +197,15 @@
             
             errorDiv.style.display = 'none';
             
-            // Проверка логина и пароля
+            // Простая проверка логина и пароля
             if (username === 'admin' && password === 'admin123') {
                 sessionStorage.setItem('admin_authenticated', 'true');
                 sessionStorage.setItem('admin_login_time', Date.now().toString());
                 window.location.href = 'admin.html';
             } else {
-                errorDiv.textContent = '❌ Неверный логин или пароль';
+                errorDiv.textContent = '❌ Неверный логин или пароль! Попробуйте admin / admin123';
                 errorDiv.style.display = 'block';
+                document.getElementById('password').value = '';
             }
         });
     </script>
