@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>REVERAGE - ТЕСТ АДМИНКИ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #fff; margin-bottom: 20px; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-card h2 { font-size: 32px; color: #00ff00; margin: 0; }
+        button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button.danger { background: #ff4444; color: white; }
+        .product-card {
+            background: #1a1a1a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .products-list { margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🛍️ REVERAGE SS1 - ТЕСТОВАЯ АДМИНКА</h1>
+    
+    <div class="stats">
+        <div class="stat-card"><h2 id="totalProducts">0</h2><p>Товаров</p></div>
+        <div class="stat-card"><h2 id="totalOrders">0</h2><p>Заказов</p></div>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+        <button id="addBtn" style="background: #00ff00; color: #000;">➕ ДОБАВИТЬ ТЕСТОВЫЙ ТОВАР</button>
+        <button id="refreshBtn">🔄 ОБНОВИТЬ</button>
+    </div>
+    
+    <div class="products-list" id="productsList"></div>
+</div>
+
+<script>
+    let products = [];
+    
+    // Загрузка данных
+    function loadData() {
+        const saved = localStorage.getItem('reverage_products');
+        if (saved) {
+            products = JSON.parse(saved);
+        } else {
+            products = [
+                { id: 1, name: "ТЕСТОВЫЙ ТОВАР 1", price: 1000, category: "test", sizes: ["S","M","L"] },
+                { id: 2, name: "ТЕСТОВЫЙ ТОВАР 2", price: 2000, category: "test", sizes: ["S","M","L"] }
+            ];
+            localStorage.setItem('reverage_products', JSON.stringify(products));
+        }
+        updateStats();
+        renderProducts();
+        console.log('Загружено товаров:', products.length);
+    }
+    
+    function updateStats() {
+        document.getElementById('totalProducts').innerText = products.length;
+        const orders = JSON.parse(localStorage.getItem('reverage_orders_admin') || '[]');
+        document.getElementById('totalOrders').innerText = orders.length;
+    }
+    
+    function renderProducts() {
+        const container = document.getElementById('productsList');
+        if (!container) return;
+        
+        if (products.length === 0) {
+            container.innerHTML = '<p>Нет товаров. Нажмите "ДОБАВИТЬ"</p>';
+            return;
+        }
+        
+        container.innerHTML = products.map(p => `
+            <div class="product-card" data-id="${p.id}">
+                <div>
+                    <strong>${p.name}</strong><br>
+                    ${p.price.toLocaleString()} ₽<br>
+                    <small>${p.category || 'test'} | ${(p.sizes || ["S","M","L"]).join(", ")}</small>
+                </div>
+                <div>
+                    <button class="edit-btn" data-id="${p.id}" style="background: #ffaa00; color: #000;">✏️ ИЗМЕНИТЬ</button>
+                    <button class="delete-btn" data-id="${p.id}" class="danger" style="background: #ff4444; color: white;">🗑️ УДАЛИТЬ</button>
+                </div>
+            </div>
+        `).join('');
+        
+        // НАЗНАЧАЕМ ОБРАБОТЧИКИ КНОПОК
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.onclick = function() {
+                const id = parseInt(this.dataset.id);
+                const product = products.find(p => p.id === id);
+                if (product) {
+                    const newName = prompt("Новое название:", product.name);
+                    if (newName) product.name = newName;
+                    const newPrice = parseInt(prompt("Новая цена:", product.price));
+                    if (newPrice) product.price = newPrice;
+                    localStorage.setItem('reverage_products', JSON.stringify(products));
+                    loadData();
+                    alert('Товар изменен! Обновите главную страницу магазина.');
+                }
+            };
+        });
+        
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.onclick = function() {
+                const id = parseInt(this.dataset.id);
+                if (confirm('Удалить товар?')) {
+                    products = products.filter(p => p.id !== id);
+                    localStorage.setItem('reverage_products', JSON.stringify(products));
+                    loadData();
+                    alert('Товар удален!');
+                }
+            };
+        });
+    }
+    
+    // Добавление тестового товара
+    function addTestProduct() {
+        const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 100;
+        const newProduct = {
+            id: newId,
+            name: "ТОВАР " + newId,
+            price: 999,
+            category: "test",
+            sizes: ["S","M","L"],
+            desc: "",
+            img: ""
+        };
+        products.push(newProduct);
+        localStorage.setItem('reverage_products', JSON.stringify(products));
+        loadData();
+        alert('Товар добавлен! Обновите главную страницу магазина.');
+    }
+    
+    // Инициализация
+    document.getElementById('addBtn').onclick = addTestProduct;
+    document.getElementById('refreshBtn').onclick = loadData;
+    
+    loadData();
+    console.log('ТЕСТОВАЯ АДМИНКА ЗАГРУЖЕНА');
+</script>
+</body>
+</html>
