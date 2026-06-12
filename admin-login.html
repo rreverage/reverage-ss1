@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REVERAGE SS1 — Вход в админку</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #000000 0%, #1a0000 100%);
@@ -19,7 +14,6 @@
             align-items: center;
             justify-content: center;
         }
-        
         .login-container {
             background: rgba(0, 0, 0, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -28,36 +22,11 @@
             width: 90%;
             max-width: 400px;
         }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .logo h1 {
-            font-size: 28px;
-            color: white;
-        }
-        
-        .logo span {
-            background: white;
-            color: black;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 12px;
-        }
-        
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { font-size: 28px; color: white; }
+        .logo span { background: white; color: black; padding: 2px 8px; border-radius: 20px; font-size: 12px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: rgba(255, 255, 255, 0.7); font-size: 12px; }
         input {
             width: 100%;
             padding: 12px;
@@ -67,7 +36,6 @@
             color: white;
             font-size: 14px;
         }
-        
         button {
             width: 100%;
             padding: 12px;
@@ -80,11 +48,7 @@
             margin-top: 10px;
             font-size: 14px;
         }
-        
-        button:hover {
-            background: #ddd;
-        }
-        
+        button:hover { background: #ddd; }
         .error-message {
             background: rgba(255, 0, 0, 0.1);
             border: 1px solid rgba(255, 0, 0, 0.3);
@@ -96,25 +60,6 @@
             text-align: center;
             display: none;
         }
-        
-        .captcha-container {
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .captcha-code {
-            font-family: monospace;
-            font-size: 24px;
-            letter-spacing: 5px;
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        
         .security-info {
             margin-top: 20px;
             padding-top: 20px;
@@ -123,10 +68,7 @@
             color: rgba(255, 255, 255, 0.5);
             text-align: center;
         }
-        
-        .security-info p {
-            margin: 5px 0;
-        }
+        .security-info p { margin: 5px 0; }
     </style>
 </head>
 <body>
@@ -147,65 +89,31 @@
                 <input type="password" id="password" value="admin123">
             </div>
             
-            <div class="captcha-container">
-                <label>🤖 ПРОВЕРКА</label>
-                <div class="captcha-code" id="captchaCode"></div>
-                <input type="text" id="captchaInput" placeholder="Введите код">
-                <button type="button" id="refreshCaptcha" style="background: rgba(255,255,255,0.1); color: white;">Обновить</button>
-            </div>
-            
-            <button type="submit">ВОЙТИ</button>
+            <button type="submit">ВОЙТИ В АДМИНКУ</button>
         </form>
         
         <div id="errorMessage" class="error-message"></div>
         
         <div class="security-info">
-            <p>✅ Защита от XSS, CSRF</p>
-            <p>✅ Шифрование данных</p>
-            <p>✅ Сессия 30 минут</p>
+            <p>✅ Вход в админ-панель REVERAGE SS1</p>
+            <p>✅ Логин: admin | Пароль: admin123</p>
         </div>
     </div>
     
     <script>
-        // Простая CAPTCHA
-        let currentCaptcha = '';
-        
-        function generateCaptcha() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
-            currentCaptcha = '';
-            for (let i = 0; i < 5; i++) {
-                currentCaptcha += chars[Math.floor(Math.random() * chars.length)];
-            }
-            document.getElementById('captchaCode').innerHTML = currentCaptcha.split('').join(' ');
-        }
-        
-        generateCaptcha();
-        
-        document.getElementById('refreshCaptcha').addEventListener('click', generateCaptcha);
-        
-        // Вход в админку
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const captchaInput = document.getElementById('captchaInput').value;
             const errorDiv = document.getElementById('errorMessage');
             
             errorDiv.style.display = 'none';
             
-            // Проверка CAPTCHA
-            if (captchaInput.toUpperCase() !== currentCaptcha) {
-                errorDiv.textContent = '❌ Неверный код!';
-                errorDiv.style.display = 'block';
-                generateCaptcha();
-                document.getElementById('captchaInput').value = '';
-                return;
-            }
-            
-            // Проверка логина и пароля (ПРОСТО ДЛЯ ТЕСТА)
+            // Проверка логина и пароля
             if (username === 'admin' && password === 'admin123') {
                 sessionStorage.setItem('admin_authenticated', 'true');
+                sessionStorage.setItem('admin_login_time', Date.now().toString());
                 window.location.href = 'admin.html';
             } else {
                 errorDiv.textContent = '❌ Неверный логин или пароль';
