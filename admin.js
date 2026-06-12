@@ -1,4 +1,4 @@
-// REVERAGE SS1 - АДМИН ПАНЕЛЬ (ПОЛНОСТЬЮ РАБОЧАЯ ВЕРСИЯ)
+// REVERAGE SS1 - АДМИН ПАНЕЛЬ (РАБОЧАЯ ВЕРСИЯ)
 
 // ПРОВЕРКА ВХОДА
 (function() {
@@ -11,11 +11,9 @@
     }
 })();
 
-// ---- ГЛОБАЛЬНЫЕ ДАННЫЕ ----
 let products = [];
 let orders = [];
 
-// ЗАГРУЗКА ДАННЫХ ИЗ localStorage
 function loadData() {
     const storedProducts = localStorage.getItem('reverage_products');
     if (storedProducts && JSON.parse(storedProducts).length > 0) {
@@ -33,26 +31,19 @@ function loadData() {
     if (storedOrders) {
         orders = JSON.parse(storedOrders);
     } else {
-        orders = [
-            { id: 101, customer: "Алексей Иванов", total: 12490, status: "Доставлен", date: "2025-06-10" },
-            { id: 102, customer: "Мария Смирнова", total: 3990, status: "В обработке", date: "2025-06-12" }
-        ];
-        saveOrders();
+        orders = [];
     }
 }
 
 function saveProducts() {
     localStorage.setItem('reverage_products', JSON.stringify(products));
-    if (window.syncProductsFromAdmin) {
-        window.syncProductsFromAdmin(products);
-    }
+    if (window.syncProductsFromAdmin) window.syncProductsFromAdmin(products);
 }
 
 function saveOrders() {
     localStorage.setItem('reverage_orders_admin', JSON.stringify(orders));
 }
 
-// РЕНДЕР ДАШБОРДА
 function renderDashboard() {
     document.getElementById('totalProductsStat').innerText = products.length;
     document.getElementById('totalOrdersStat').innerText = orders.length;
@@ -62,7 +53,6 @@ function renderDashboard() {
     document.getElementById('totalCustomersStat').innerText = uniqueCustomers.length;
 }
 
-// РЕНДЕР ТАБЛИЦЫ ТОВАРОВ
 function renderProductsTable() {
     const tbody = document.getElementById('productsTableBody');
     if (!tbody) return;
@@ -88,179 +78,93 @@ function renderProductsTable() {
     `).join('');
     
     document.querySelectorAll('.edit-product').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = parseInt(btn.dataset.id);
-            editProduct(id);
-        });
+        btn.addEventListener('click', () => editProduct(parseInt(btn.dataset.id)));
     });
-    
     document.querySelectorAll('.delete-product').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = parseInt(btn.dataset.id);
-            if (confirm('Удалить товар?')) {
-                products = products.filter(p => p.id !== id);
-                saveProducts();
-                renderProductsTable();
-                renderDashboard();
-                alert('Товар удален! Обновите главную страницу, чтобы увидеть изменения.');
-            }
-        });
+        btn.addEventListener('click', () => deleteProduct(parseInt(btn.dataset.id)));
     });
 }
 
 function editProduct(id) {
     const product = products.find(p => p.id === id);
     if (!product) return;
-    
-    const newName = prompt("Название товара:", product.name);
+    const newName = prompt("Новое название:", product.name);
     if (!newName) return;
-    const newPrice = parseInt(prompt("Цена (₽):", product.price));
+    const newPrice = parseInt(prompt("Новая цена:", product.price));
     if (!newPrice) return;
-    const newCategory = prompt("Категория (tshirts/hoodies/jackets/shorts/pants/accessories):", product.category);
-    const newSizes = prompt("Размеры (через запятую, например: S,M,L,XL):", product.sizes.join(","));
-    
     product.name = newName;
     product.price = newPrice;
-    if (newCategory) product.category = newCategory;
-    if (newSizes) product.sizes = newSizes.split(',').map(s => s.trim().toUpperCase());
-    
     saveProducts();
     renderProductsTable();
     renderDashboard();
-    alert('Товар обновлен! Обновите главную страницу, чтобы увидеть изменения.');
+    alert('Товар обновлен!');
+}
+
+function deleteProduct(id) {
+    if (!confirm('Удалить товар?')) return;
+    products = products.filter(p => p.id !== id);
+    saveProducts();
+    renderProductsTable();
+    renderDashboard();
+    alert('Товар удален!');
 }
 
 function addProduct() {
     const name = prompt("Название товара:");
     if (!name) return;
-    const price = parseInt(prompt("Цена (₽):"));
+    const price = parseInt(prompt("Цена:"));
     if (!price) return;
-    const category = prompt("Категория (tshirts/hoodies/jackets/shorts/pants/accessories):", "tshirts");
-    const sizes = prompt("Размеры (через запятую, например: S,M,L,XL):", "S,M,L,XL");
-    const img = prompt("URL изображения (оставьте пустым для стандартного):", "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200");
-    
     const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 100;
-    
     products.push({
-        id: newId,
-        name: name,
-        price: price,
-        desc: "",
-        sizes: sizes.split(',').map(s => s.trim().toUpperCase()),
-        category: category || "tshirts",
-        img: img || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200"
+        id: newId, name: name, price: price, desc: "",
+        sizes: ["S","M","L","XL"], category: "tshirts",
+        img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200"
     });
-    
     saveProducts();
     renderProductsTable();
     renderDashboard();
-    alert('Товар добавлен! Обновите главную страницу, чтобы увидеть изменения.');
+    alert('Товар добавлен!');
 }
 
 function renderOrdersTable() {
     const tbody = document.getElementById('ordersTableBody');
     if (!tbody) return;
-    
     if (orders.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6">Нет заказов</td></tr>`;
         return;
     }
-    
     tbody.innerHTML = orders.map(o => `
         <tr>
             <td>#${o.id}</td>
             <td>${o.customer}</td>
             <td>${o.total.toLocaleString()} ₽</td>
-            <td>
-                <select class="order-status" data-id="${o.id}" style="background:#1a1a1a;color:white;border:1px solid #333;padding:5px 10px;border-radius:5px;">
-                    ${["В обработке", "Отправлен", "Доставлен", "Отменен"].map(s => `<option ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
-                </select>
-            </td>
+            <td><select class="order-status" data-id="${o.id}">${["В обработке","Отправлен","Доставлен","Отменен"].map(s => `<option ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
             <td>${o.date}</td>
-            <td><button class="delete-order" data-id="${o.id}" style="background:#ff4444;border:none;color:white;padding:5px 10px;border-radius:5px;cursor:pointer;"><i class="fas fa-trash"></i> Удалить</button></td>
+            <td><button class="delete-order" data-id="${o.id}" style="background:#ff4444;border:none;color:white;padding:5px 10px;border-radius:5px;cursor:pointer;">Удалить</button></td>
         </tr>
     `).join('');
-    
     document.querySelectorAll('.order-status').forEach(sel => {
         sel.addEventListener('change', (e) => {
-            const id = parseInt(sel.dataset.id);
-            const order = orders.find(o => o.id === id);
-            if (order) {
-                order.status = sel.value;
-                saveOrders();
-                alert('Статус заказа обновлен!');
-            }
+            const order = orders.find(o => o.id === parseInt(sel.dataset.id));
+            if (order) { order.status = sel.value; saveOrders(); alert('Статус обновлен!'); }
         });
     });
-    
     document.querySelectorAll('.delete-order').forEach(btn => {
         btn.addEventListener('click', () => {
-            const id = parseInt(btn.dataset.id);
-            if (confirm('Удалить заказ?')) {
-                orders = orders.filter(o => o.id !== id);
-                saveOrders();
-                renderOrdersTable();
-                renderDashboard();
-                alert('Заказ удален!');
-            }
+            orders = orders.filter(o => o.id !== parseInt(btn.dataset.id));
+            saveOrders(); renderOrdersTable(); renderDashboard(); alert('Заказ удален!');
         });
     });
 }
 
-// РЕНДЕР АКТИВНОСТИ
-function renderActivities() {
-    const list = document.getElementById('recentActivitiesList');
-    if (!list) return;
-    
-    const activities = [
-        { time: new Date().toLocaleString(), message: "Админ панель загружена" },
-        { time: new Date().toLocaleString(), message: `Всего товаров: ${products.length}` },
-        { time: new Date().toLocaleString(), message: `Всего заказов: ${orders.length}` }
-    ];
-    
-    list.innerHTML = activities.map(a => `<li><i class="fas fa-clock"></i> ${a.time} — ${a.message}</li>`).join('');
-}
-
-// ИНИЦИАЛИЗАЦИЯ
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
     loadData();
     renderDashboard();
     renderProductsTable();
     renderOrdersTable();
-    renderActivities();
-    
     document.getElementById('addProductBtn')?.addEventListener('click', addProduct);
-    
-    document.getElementById('refreshDataBtn')?.addEventListener('click', () => {
-        loadData();
-        renderDashboard();
-        renderProductsTable();
-        renderOrdersTable();
-        renderActivities();
-        alert('Данные синхронизированы!');
-    });
-    
-    document.getElementById('exportDataBtn')?.addEventListener('click', () => {
-        const data = { products, orders, exportDate: new Date().toISOString() };
-        const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `reverage_backup_${Date.now()}.json`;
-        a.click();
-        alert('Экспорт выполнен!');
-    });
-    
-    document.getElementById('logoutBtn')?.addEventListener('click', () => {
-        sessionStorage.clear();
-        window.location.href = 'admin-login.html';
-    });
-    
-    // Обновление статистики при переключении вкладок
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-            if (item.dataset.tab === 'dashboard') renderDashboard();
-            if (item.dataset.tab === 'products') renderProductsTable();
-            if (item.dataset.tab === 'orders') renderOrdersTable();
-        });
-    });
-});
+    document.getElementById('refreshDataBtn')?.addEventListener('click', () => { loadData(); renderDashboard(); renderProductsTable(); renderOrdersTable(); alert('Обновлено!'); });
+    document.getElementById('logoutBtn')?.addEventListener('click', () => { sessionStorage.clear(); window.location.href = 'admin-login.html'; });
+}
+
+document.addEventListener('DOMContentLoaded', init);
