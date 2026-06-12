@@ -1,19 +1,7 @@
-// Данные товаров с категориями
-const products = [
-    { id: 1, name: "OVERSIZED HOODIE BLACK", price: 8990, desc: "Хлопок 100%, объемный крой, вышивка REVERAGE. Премиальное качество.", sizes: ["S", "M", "L", "XL"], category: "hoodies", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500" },
-    { id: 2, name: "CARGO PANTS SS1", price: 7490, desc: "Утилитарные карго с множеством карманов, плотная ткань, регулируемые манжеты.", sizes: ["S", "M", "L", "XL"], category: "pants", img: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500" },
-    { id: 3, name: "TACTICAL VEST", price: 12990, desc: "Тактический жилет из нейлона, регулировка по размеру, молнии YKK.", sizes: ["M", "L", "XL"], category: "accessories", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500" },
-    { id: 4, name: "GRAPHIC TEE WHITE", price: 3990, desc: "Футболка с принтом SS1, 100% хлопок, принт высокого качества.", sizes: ["S", "M", "L", "XL", "XXL"], category: "tshirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500" },
-    { id: 5, name: "BALACLAVA BEANIE", price: 2490, desc: "Бафф/балаклава с вышитым логотипом, унисекс, один размер.", sizes: ["ONE SIZE"], category: "accessories", img: "https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9?w=500" },
-    { id: 6, name: "DENIM JACKET REVERAGE", price: 15990, desc: "Джинсовая куртка с пэчворком и вышивкой, деним 100% хлопок.", sizes: ["S", "M", "L"], category: "jackets", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=500" },
-    { id: 7, name: "SWEATPANTS BLACK", price: 6490, desc: "Спортивные штаны на флисе, карманы, утяжка на поясе.", sizes: ["S", "M", "L", "XL"], category: "pants", img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=500" },
-    { id: 8, name: "SNAPBACK CAP", price: 2990, desc: "Кепка-снапбэк с вышитым логотипом REVERAGE, регулировка.", sizes: ["ONE SIZE"], category: "accessories", img: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500" },
-    { id: 9, name: "SUMMER SHORTS", price: 4990, desc: "Хлопковые шорты с логотипом, удобный крой, два кармана.", sizes: ["S", "M", "L", "XL"], category: "shorts", img: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=500" },
-    { id: 10, name: "CARGO SHORTS", price: 5990, desc: "Утилитарные шорты с множеством карманов.", sizes: ["S", "M", "L", "XL"], category: "shorts", img: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500" },
-    { id: 11, name: "ZIP HOODIE GREEN", price: 9990, desc: "Худи на молнии из премиального хлопка.", sizes: ["S", "M", "L", "XL"], category: "hoodies", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500" },
-    { id: 12, name: "LEATHER KEYCHAIN", price: 1490, desc: "Брелок из натуральной кожи с логотипом.", sizes: ["ONE SIZE"], category: "accessories", img: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500" }
-];
+// REVERAGE SS1 - ОСНОВНОЙ СКРИПТ МАГАЗИНА (синхронизирован с админкой)
 
+// Глобальные переменные
+let products = [];
 let cart = [];
 let currentProduct = null;
 let selectedSize = null;
@@ -31,21 +19,74 @@ const addressDatabase = {
 
 let streetDatabase = {};
 
-// Загрузка при старте
-document.addEventListener('DOMContentLoaded', function() {
-    loadCartFromStorage();
-    renderCatalog(products);
-    initEventListeners();
-    initChat();
-    initVirtualCard();
-    initMobileMenu();
-});
-
-function closeWelcomeModal() {
-    const modal = document.getElementById('welcomeModal');
-    if (modal) modal.style.display = 'none';
+// ========== ЗАГРУЗКА ТОВАРОВ ИЗ localStorage (СИНХРОНИЗАЦИЯ С АДМИНКОЙ) ==========
+function loadProductsFromStorage() {
+    const savedProducts = localStorage.getItem('reverage_products');
+    if (savedProducts && JSON.parse(savedProducts).length > 0) {
+        products = JSON.parse(savedProducts);
+    } else {
+        // Стандартные товары (первоначальная загрузка)
+        products = [
+            { id: 1, name: "OVERSIZED HOODIE BLACK", price: 8990, desc: "Хлопок 100%, объемный крой, вышивка REVERAGE. Премиальное качество.", sizes: ["S", "M", "L", "XL"], category: "hoodies", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500" },
+            { id: 2, name: "CARGO PANTS SS1", price: 7490, desc: "Утилитарные карго с множеством карманов, плотная ткань, регулируемые манжеты.", sizes: ["S", "M", "L", "XL"], category: "pants", img: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500" },
+            { id: 3, name: "TACTICAL VEST", price: 12990, desc: "Тактический жилет из нейлона, регулировка по размеру, молнии YKK.", sizes: ["M", "L", "XL"], category: "accessories", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500" },
+            { id: 4, name: "GRAPHIC TEE WHITE", price: 3990, desc: "Футболка с принтом SS1, 100% хлопок, принт высокого качества.", sizes: ["S", "M", "L", "XL", "XXL"], category: "tshirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500" },
+            { id: 5, name: "BALACLAVA BEANIE", price: 2490, desc: "Бафф/балаклава с вышитым логотипом, унисекс, один размер.", sizes: ["ONE SIZE"], category: "accessories", img: "https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9?w=500" },
+            { id: 6, name: "DENIM JACKET REVERAGE", price: 15990, desc: "Джинсовая куртка с пэчворком и вышивкой, деним 100% хлопок.", sizes: ["S", "M", "L"], category: "jackets", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=500" },
+            { id: 7, name: "SWEATPANTS BLACK", price: 6490, desc: "Спортивные штаны на флисе, карманы, утяжка на поясе.", sizes: ["S", "M", "L", "XL"], category: "pants", img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=500" },
+            { id: 8, name: "SNAPBACK CAP", price: 2990, desc: "Кепка-снапбэк с вышитым логотипом REVERAGE, регулировка.", sizes: ["ONE SIZE"], category: "accessories", img: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500" },
+            { id: 9, name: "SUMMER SHORTS", price: 4990, desc: "Хлопковые шорты с логотипом, удобный крой, два кармана.", sizes: ["S", "M", "L", "XL"], category: "shorts", img: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=500" },
+            { id: 10, name: "CARGO SHORTS", price: 5990, desc: "Утилитарные шорты с множеством карманов.", sizes: ["S", "M", "L", "XL"], category: "shorts", img: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500" },
+            { id: 11, name: "ZIP HOODIE GREEN", price: 9990, desc: "Худи на молнии из премиального хлопка.", sizes: ["S", "M", "L", "XL"], category: "hoodies", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500" },
+            { id: 12, name: "LEATHER KEYCHAIN", price: 1490, desc: "Брелок из натуральной кожи с логотипом.", sizes: ["ONE SIZE"], category: "accessories", img: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500" }
+        ];
+        localStorage.setItem('reverage_products', JSON.stringify(products));
+    }
 }
 
+function saveProductsToStorage() {
+    localStorage.setItem('reverage_products', JSON.stringify(products));
+}
+
+// Функция для синхронизации с админкой
+window.syncProductsFromAdmin = function(adminProducts) {
+    products = adminProducts;
+    saveProductsToStorage();
+    if (document.querySelector('.catalog-container')) {
+        renderCatalog(products);
+    }
+};
+
+// Загрузка корзины
+function loadCartFromStorage() {
+    const saved = localStorage.getItem('reverage_cart');
+    if (saved) {
+        try {
+            cart = JSON.parse(saved);
+        } catch(e) {
+            cart = [];
+        }
+    }
+    updateCartCount();
+}
+
+function saveCart() {
+    localStorage.setItem('reverage_cart', JSON.stringify(cart));
+    updateCartCount();
+}
+
+function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCountElem = document.getElementById('cartCount');
+    if (cartCountElem) cartCountElem.innerText = count;
+}
+
+function updateCartUI() {
+    if (document.querySelector('.cart-container')) renderCart();
+    updateCartCount();
+}
+
+// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
 function getCategoryName(cat) {
     const names = {
         tshirts: "Футболки",
@@ -58,24 +99,29 @@ function getCategoryName(cat) {
     return names[cat] || cat;
 }
 
-// Мобильное меню
-function initMobileMenu() {
-    const menuBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (menuBtn && navLinks) {
-        menuBtn.addEventListener('click', function() {
-            navLinks.classList.toggle('mobile-open');
-            if (navLinks.classList.contains('mobile-open')) {
-                menuBtn.innerHTML = '<i class="fas fa-times"></i>';
-            } else {
-                menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-            }
-        });
-    }
+function showNotification(msg, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerText = msg;
+    notification.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #ffffff;
+        color: #000000;
+        padding: 12px 24px;
+        border-radius: 40px;
+        z-index: 1001;
+        font-size: 14px;
+        animation: fadeInOut 2s ease;
+        font-weight: bold;
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 2000);
 }
 
-// Рендер каталога
+// ========== РЕНДЕР КАТАЛОГА ==========
 function renderCatalog(productsToRender) {
     const app = document.getElementById('app');
     if (!app) return;
@@ -160,6 +206,7 @@ function renderCatalog(productsToRender) {
     }
 }
 
+// ========== МОДАЛЬНЫЕ ОКНА ==========
 function openQuickAddModal(product) {
     pendingAddToCart = product;
     selectedSize = null;
@@ -180,7 +227,7 @@ function openQuickAddModal(product) {
         ).join('');
         
         document.querySelectorAll('#quickSizeOptions .size-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function() {
                 document.querySelectorAll('#quickSizeOptions .size-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 selectedSize = btn.dataset.size;
@@ -213,7 +260,7 @@ function openProductModal(productId) {
         ).join('');
         
         document.querySelectorAll('#sizeOptions .size-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function() {
                 document.querySelectorAll('#sizeOptions .size-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 selectedSize = btn.dataset.size;
@@ -243,38 +290,7 @@ function addToCart(product, size) {
     return true;
 }
 
-function showNotification(msg, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerText = msg;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 2000);
-}
-
-function saveCart() {
-    localStorage.setItem('reverage_cart', JSON.stringify(cart));
-    updateCartCount();
-}
-
-function loadCartFromStorage() {
-    const saved = localStorage.getItem('reverage_cart');
-    if (saved) {
-        try {
-            cart = JSON.parse(saved);
-        } catch(e) {
-            cart = [];
-        }
-    }
-    updateCartCount();
-}
-
-function updateCartCount() {
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const cartCountElem = document.getElementById('cartCount');
-    if (cartCountElem) cartCountElem.innerText = count;
-}
-
-// Рендер корзины с крестиком для закрытия
+// ========== КОРЗИНА ==========
 function renderCart() {
     const app = document.getElementById('app');
     if (!app) return;
@@ -354,11 +370,135 @@ window.removeFromCart = function(idx) {
     renderCart();
 };
 
-function updateCartUI() {
-    if (document.querySelector('.cart-container')) renderCart();
-    updateCartCount();
+// ========== КОНТАКТЫ ==========
+function renderContacts() {
+    const app = document.getElementById('app');
+    if (!app) return;
+    
+    app.innerHTML = `
+        <div class="contacts-container">
+            <h2>КОНТАКТЫ</h2>
+            <div class="contacts-grid">
+                <div class="contact-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>АДРЕС</h3>
+                    <p>г. Москва, ул. Тверская, 15</p>
+                    <p>Ежедневно 11:00 - 21:00</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-phone"></i>
+                    <h3>ТЕЛЕФОН</h3>
+                    <p>+7 (800) 555-35-35</p>
+                    <p>+7 (495) 123-45-67</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-envelope"></i>
+                    <h3>EMAIL</h3>
+                    <p>info@reverage.com</p>
+                    <p>support@reverage.com</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fab fa-instagram"></i>
+                    <h3>INSTAGRAM</h3>
+                    <p>@reverage_official</p>
+                    <p>@reverage_ss1</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fab fa-telegram"></i>
+                    <h3>TELEGRAM</h3>
+                    <p>@reverage_bot</p>
+                    <p>t.me/reverage</p>
+                </div>
+                <div class="contact-card">
+                    <i class="fab fa-whatsapp"></i>
+                    <h3>WHATSAPP</h3>
+                    <p>+7 (999) 123-45-67</p>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
+// ========== АДРЕСА (АВТОЗАПОЛНЕНИЕ) ==========
+function initAddressAutocomplete() {
+    const cityInput = document.getElementById('cityInput');
+    const streetInput = document.getElementById('streetInput');
+    const citySuggestions = document.getElementById('citySuggestions');
+    const streetSuggestions = document.getElementById('streetSuggestions');
+    const postalInput = document.getElementById('postalInput');
+    
+    if (!cityInput) return;
+    
+    cityInput.addEventListener('input', function() {
+        const val = cityInput.value.toLowerCase();
+        if (val.length < 2) {
+            if (citySuggestions) citySuggestions.style.display = 'none';
+            return;
+        }
+        
+        const filtered = Object.keys(addressDatabase).filter(city => 
+            city.includes(val) || val.includes(city)
+        );
+        
+        if (filtered.length && citySuggestions) {
+            citySuggestions.innerHTML = filtered.map(city => `<div style="padding:8px;cursor:pointer;background:#1a1a1a;border-bottom:1px solid #333;">${city.charAt(0).toUpperCase() + city.slice(1)}</div>`).join('');
+            citySuggestions.style.display = 'block';
+            
+            document.querySelectorAll('#citySuggestions div').forEach(div => {
+                div.onclick = function() {
+                    const selectedCity = div.innerText.toLowerCase();
+                    cityInput.value = div.innerText;
+                    citySuggestions.style.display = 'none';
+                    
+                    if (addressDatabase[selectedCity]) {
+                        streetDatabase = {};
+                        addressDatabase[selectedCity].streets.forEach(s => {
+                            streetDatabase[s.toLowerCase()] = s;
+                        });
+                        if (postalInput) postalInput.value = addressDatabase[selectedCity].postal;
+                    }
+                };
+            });
+        } else if (citySuggestions) {
+            citySuggestions.style.display = 'none';
+        }
+    });
+    
+    if (streetInput && streetSuggestions) {
+        streetInput.addEventListener('input', function() {
+            const val = streetInput.value.toLowerCase();
+            if (val.length < 2 || Object.keys(streetDatabase).length === 0) {
+                streetSuggestions.style.display = 'none';
+                return;
+            }
+            
+            const filtered = Object.keys(streetDatabase).filter(street => street.includes(val));
+            
+            if (filtered.length) {
+                streetSuggestions.innerHTML = filtered.slice(0, 5).map(street => 
+                    `<div style="padding:8px;cursor:pointer;background:#1a1a1a;border-bottom:1px solid #333;">${streetDatabase[street]}</div>`
+                ).join('');
+                streetSuggestions.style.display = 'block';
+                
+                document.querySelectorAll('#streetSuggestions div').forEach(div => {
+                    div.onclick = function() {
+                        streetInput.value = div.innerText;
+                        streetSuggestions.style.display = 'none';
+                    };
+                });
+            } else {
+                streetSuggestions.style.display = 'none';
+            }
+        });
+    }
+    
+    document.addEventListener('click', function(e) {
+        if (citySuggestions && !cityInput.contains(e.target)) citySuggestions.style.display = 'none';
+        if (streetSuggestions && !streetInput.contains(e.target)) streetSuggestions.style.display = 'none';
+    });
+}
+
+// ========== ВИРТУАЛЬНАЯ КАРТА ==========
 function initVirtualCard() {
     const cardNumber = document.getElementById('cardNumberInput');
     const cardExpiry = document.getElementById('cardExpiryInput');
@@ -399,135 +539,7 @@ function initVirtualCard() {
     }
 }
 
-function initAddressAutocomplete() {
-    const cityInput = document.getElementById('cityInput');
-    const streetInput = document.getElementById('streetInput');
-    const citySuggestions = document.getElementById('citySuggestions');
-    const streetSuggestions = document.getElementById('streetSuggestions');
-    const postalInput = document.getElementById('postalInput');
-    
-    if (!cityInput) return;
-    
-    cityInput.addEventListener('input', function() {
-        const val = cityInput.value.toLowerCase();
-        if (val.length < 2) {
-            if (citySuggestions) citySuggestions.style.display = 'none';
-            return;
-        }
-        
-        const filtered = Object.keys(addressDatabase).filter(city => 
-            city.includes(val) || val.includes(city)
-        );
-        
-        if (filtered.length && citySuggestions) {
-            citySuggestions.innerHTML = filtered.map(city => `<div>${city.charAt(0).toUpperCase() + city.slice(1)}</div>`).join('');
-            citySuggestions.style.display = 'block';
-            
-            document.querySelectorAll('#citySuggestions div').forEach(div => {
-                div.onclick = function() {
-                    const selectedCity = div.innerText.toLowerCase();
-                    cityInput.value = div.innerText;
-                    citySuggestions.style.display = 'none';
-                    
-                    if (addressDatabase[selectedCity]) {
-                        streetDatabase = {};
-                        addressDatabase[selectedCity].streets.forEach(s => {
-                            streetDatabase[s.toLowerCase()] = s;
-                        });
-                        if (postalInput) postalInput.value = addressDatabase[selectedCity].postal;
-                    }
-                };
-            });
-        } else if (citySuggestions) {
-            citySuggestions.style.display = 'none';
-        }
-    });
-    
-    if (streetInput && streetSuggestions) {
-        streetInput.addEventListener('input', function() {
-            const val = streetInput.value.toLowerCase();
-            if (val.length < 2 || Object.keys(streetDatabase).length === 0) {
-                streetSuggestions.style.display = 'none';
-                return;
-            }
-            
-            const filtered = Object.keys(streetDatabase).filter(street => 
-                street.includes(val)
-            );
-            
-            if (filtered.length) {
-                streetSuggestions.innerHTML = filtered.slice(0, 5).map(street => 
-                    `<div>${streetDatabase[street]}</div>`
-                ).join('');
-                streetSuggestions.style.display = 'block';
-                
-                document.querySelectorAll('#streetSuggestions div').forEach(div => {
-                    div.onclick = function() {
-                        streetInput.value = div.innerText;
-                        streetSuggestions.style.display = 'none';
-                    };
-                });
-            } else {
-                streetSuggestions.style.display = 'none';
-            }
-        });
-    }
-    
-    document.addEventListener('click', function(e) {
-        if (citySuggestions && !cityInput.contains(e.target)) citySuggestions.style.display = 'none';
-        if (streetSuggestions && !streetInput.contains(e.target)) streetSuggestions.style.display = 'none';
-    });
-}
-
-function renderContacts() {
-    const app = document.getElementById('app');
-    if (!app) return;
-    
-    app.innerHTML = `
-        <div class="contacts-container">
-            <h2>КОНТАКТЫ</h2>
-            <div class="contacts-grid">
-                <div class="contact-card">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h3>АДРЕС</h3>
-                    <p>г. Норильск </p>
-                    <p>Ежедневно 11:00 - 21:00</p>
-                </div>
-                <div class="contact-card">
-                    <i class="fas fa-phone"></i>
-                    <h3>ТЕЛЕФОН</h3>
-                    <p>+7 (913) 531-74-05</p>
-                    <p>+7 (923) 206-14-99</p>
-                </div>
-                <div class="contact-card">
-                    <i class="fas fa-envelope"></i>
-                    <h3>EMAIL</h3>
-                    <p>info@reverage.c</p>
-                    <p>support@reverage.com</p>
-                </div>
-                <div class="contact-card">
-                    <i class="fab fa-instagram"></i>
-                    <h3>INSTAGRAM</h3>
-                    <p>@reverage_official</p>
-                    <p>@reverage_ss1</p>
-                </div>
-                <div class="contact-card">
-                    <i class="fab fa-telegram"></i>
-                    <h3>TELEGRAM</h3>
-                    <p>@REVmanager_bot</p>
-                    <p>t.me/reveragest2026</p>
-                </div>
-                <div class="contact-card">
-                    <i class="fab fa-whatsapp"></i>
-                    <h3>WHATSAPP</h3>
-                    <p>+7 (923) 206-14-99</p>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// Чат бот
+// ========== ЧАТ БОТ ==========
 const botResponses = {
     "размер": "У нас представлены размеры от XS до XXL. В карточке каждого товара можно выбрать подходящий размер.",
     "доставка": "Доставляем по всей России. Сроки: 3-7 дней. Бесплатно от 5000₽.",
@@ -535,7 +547,7 @@ const botResponses = {
     "скидки": "При первом заказе скидка 10% по промокоду REVERAGE10!",
     "ткань": "Используем 100% хлопок, премиальный полиэстер, нейлон. Состав указан в описании.",
     "привет": "Привет! Я ассистент REVERAGE. Чем могу помочь? 🖤",
-    "контакты": "Наши контакты: +7 (913) 531-74-05, info@reverage.com, Instagram @reverage_official"
+    "контакты": "Наши контакты: +7 (800) 555-35-35, info@reverage.com, Instagram @reverage_official"
 };
 
 function getBotResponse(message) {
@@ -605,6 +617,12 @@ function initChat() {
     });
 }
 
+// ========== ГЛАВНАЯ ИНИЦИАЛИЗАЦИЯ ==========
+function closeWelcomeModal() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal) modal.style.display = 'none';
+}
+
 function initEventListeners() {
     const welcomeCloseBtn = document.getElementById('closeWelcomeBtn');
     if (welcomeCloseBtn) welcomeCloseBtn.onclick = closeWelcomeModal;
@@ -621,7 +639,6 @@ function initEventListeners() {
             if (page === 'contacts') renderContacts();
             if (page === 'delivery') document.getElementById('deliveryModal').style.display = 'flex';
             
-            // Закрываем мобильное меню после клика
             const navLinks = document.querySelector('.nav-links');
             const menuBtn = document.querySelector('.mobile-menu-btn');
             if (navLinks && navLinks.classList && navLinks.classList.contains('mobile-open')) {
@@ -687,7 +704,6 @@ function initEventListeners() {
                 return;
             }
             
-            // Добавляем заказ в localStorage для админки
             const newOrder = {
                 id: Date.now(),
                 customer: fullName.value,
@@ -712,7 +728,32 @@ function initEventListeners() {
     initAddressAutocomplete();
 }
 
+// ЗАПУСК
+document.addEventListener('DOMContentLoaded', function() {
+    loadProductsFromStorage();
+    loadCartFromStorage();
+    renderCatalog(products);
+    initEventListeners();
+    initChat();
+    initVirtualCard();
+    initMobileMenu();
+});
+
+function initMobileMenu() {
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (menuBtn && navLinks) {
+        menuBtn.addEventListener('click', function() {
+            navLinks.classList.toggle('mobile-open');
+            if (navLinks.classList.contains('mobile-open')) {
+                menuBtn.innerHTML = '<i class="fas fa-times"></i>';
+            } else {
+                menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        });
+    }
+}
+
 window.renderCatalog = renderCatalog;
 window.products = products;
-window.changeQuantity = changeQuantity;
-window.removeFromCart = removeFromCart;
